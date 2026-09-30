@@ -1,0 +1,7 @@
+jtype: SearchIn
+py_modules:
+  - executor.py
+metas:
+  name: Search entrypoint
+  description: Search users entrypoint
+  keywords: ['executor', 'search', 'entrypoint']

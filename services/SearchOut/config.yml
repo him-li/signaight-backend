@@ -1,0 +1,7 @@
+jtype: SearchOut
+py_modules:
+  - executor.py
+metas:
+  name: Search exitpoint
+  description: Search users exitpoint
+  keywords: ['executor', 'search', 'exitpoint']

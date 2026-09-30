@@ -1,0 +1,18 @@
+version: '3.6'
+
+services:
+
+  backend-api:
+    restart: always
+    image: signaight/backend-old:latest
+    build:
+      dockerfile: api/Dockerfile
+    volumes:
+      - ./lib:/code/lib
+      - ./core:/code/core
+      - ./api:/code/api
+      - ./cli:/code/cli
+      - ./services:/code/services
+    ports:
+      - "8000:8000"
+    env_file: .env

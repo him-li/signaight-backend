@@ -1,0 +1,16 @@
+# core deps include
+-r ../core/requirements.txt
+
+# fastapi and interface deps
+uvicorn>=0.21.1
+h11>=0.14.0
+pyyaml>=6.0.1
+git+https://github.com/googleapis/python-api-common-protos.git@28fc17a#egg=googleapis-common-protos
+fastapi>=0.104.0,<0.112.4
+fastapi-lifespan-manager>=0.1.4
+fastapi-mail>=1.2.6
+fastapi-pagination==0.14.3
+fastapi-filter>=1.1.0
+# decouple==0.0.7
+pydantic-2-mermaid>=0.7.0
+networkx==3.6.1

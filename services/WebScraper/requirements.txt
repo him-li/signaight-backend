@@ -1,0 +1,6 @@
+watchfiles==0.19.0
+ydata-profiling>=4.1.2
+pendulum>=3.0.0
+tempora>=5.5.1
+playwright==1.53.0
+parsel>=1.8.1

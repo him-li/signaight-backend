@@ -1,0 +1,7 @@
+jtype: InstagramAPI
+py_modules:
+  - executor/__init__.py
+metas:
+  name: Instagram API Sesarch
+  description: Search users and their metadata at Instagram
+  keywords: ['executor', 'search', 'instagram']

@@ -1,0 +1,7 @@
+jtype: FacebookAPI
+py_modules:
+  - executor/__init__.py
+metas:
+  name: Facebook API Search
+  description: Search users and their metadata at Facebook
+  keywords: ["executor", "search", "facebook"]

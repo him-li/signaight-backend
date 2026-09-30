@@ -1,0 +1,176 @@
+version: "3.6"
+
+services:
+  redis:
+    env_file: .env
+    volumes:
+      - redis-data:/data
+
+  minio:
+    restart: unless-stopped
+    image: minio/minio:latest
+    platform: linux/amd64
+    command: server --console-address ":9001" /data/
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${AWS_ACCESS_KEY_ID}
+      MINIO_ROOT_PASSWORD: ${AWS_SECRET_ACCESS_KEY}
+      MINIO_SERVER_URL: ${AWS_SERVER_URL}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  mongodb-primary:
+    restart: unless-stopped
+    image: "ghcr.io/xavidop/mongodb:7.0-debian-12"
+    platform: linux/amd64
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=mongodb-primary
+      - MONGODB_REPLICA_SET_MODE=primary
+      - MONGODB_ROOT_PASSWORD=${MONGODB_ROOT_PASSWORD}
+      - MONGODB_REPLICA_SET_KEY=${MONGODB_REPLICA_SET_KEY}
+      - "MONGODB_EXTRA_FLAGS= --quiet  --logpath /dev/null"
+      - MONGODB_DISABLE_SYSTEM_LOG=false
+      - MONGODB_SYSTEM_LOG_VERBOSITY=0
+      # https://github.com/bitnami/containers/issues/40947
+      - EXPERIMENTAL_DOCKER_DESKTOP_FORCE_QEMU=1
+    ports:
+      - "27017:27017"
+    volumes:
+      - "app-db-data:/bitnami/mongodb"
+
+  mongodb-secondary:
+    restart: unless-stopped
+    image: "ghcr.io/xavidop/mongodb:7.0-debian-12"
+    platform: linux/amd64
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=mongodb-secondary
+      - MONGODB_REPLICA_SET_MODE=secondary
+      - MONGODB_INITIAL_PRIMARY_HOST=mongodb-primary
+      - MONGODB_INITIAL_PRIMARY_PORT_NUMBER=27017
+      - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=${MONGODB_ROOT_PASSWORD}
+      - MONGODB_REPLICA_SET_KEY=${MONGODB_REPLICA_SET_KEY}
+      - "MONGODB_EXTRA_FLAGS= --quiet  --logpath /dev/null"
+      - MONGODB_DISABLE_SYSTEM_LOG=false
+      - MONGODB_SYSTEM_LOG_VERBOSITY=0
+      # https://github.com/bitnami/containers/issues/40947
+      - EXPERIMENTAL_DOCKER_DESKTOP_FORCE_QEMU=1
+
+  mongodb-arbiter:
+    restart: unless-stopped
+    image: "ghcr.io/xavidop/mongodb:7.0-debian-12"
+    platform: linux/amd64
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=mongodb-arbiter
+      - MONGODB_REPLICA_SET_MODE=arbiter
+      - MONGODB_INITIAL_PRIMARY_HOST=mongodb-primary
+      - MONGODB_INITIAL_PRIMARY_PORT_NUMBER=27017
+      - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=${MONGODB_ROOT_PASSWORD}
+      - MONGODB_REPLICA_SET_KEY=${MONGODB_REPLICA_SET_KEY}
+      - "MONGODB_EXTRA_FLAGS= --quiet  --logpath /dev/null"
+      - MONGODB_DISABLE_SYSTEM_LOG=false
+      - MONGODB_SYSTEM_LOG_VERBOSITY=0
+      # https://github.com/bitnami/containers/issues/40947
+      - EXPERIMENTAL_DOCKER_DESKTOP_FORCE_QEMU=1
+
+  postgres:
+    restart: unless-stopped
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - 5432:5432
+
+  cerbos:
+    restart: unless-stopped
+    image: signaight-testing-cerbos:latest
+    platform: linux/amd64
+    build:
+      context: ../signaight-authz
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    links:
+      - postgres
+    environment:
+      WAIT_HOSTS: ${POSTGRES_HOST}:5432
+      WAIT_AFTER: 2
+    ports:
+      - 3592:3592
+      - 3593:3593
+
+  playwright-server:
+    restart: always
+    image: "mcr.microsoft.com/playwright:v1.53.0-noble"
+    environment:
+      DEBUG: pw:api
+    command:
+      [
+        "npx",
+        "-y",
+        "playwright@1.53.0",
+        "run-server",
+        "--port",
+        "3000",
+        "--host",
+        "0.0.0.0",
+      ]
+
+  jina-linkedin-flow:
+    restart: no
+    image: signaight-testing-jina:latest
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: ./services/Dockerfile
+    depends_on:
+      - mongodb-primary
+      - mongodb-secondary
+      - mongodb-arbiter
+      - redis
+    links:
+      - mongodb-primary
+      - mongodb-secondary
+      - mongodb-arbiter
+      - redis
+    volumes:
+      - ./:/opt/app
+    ports:
+      - 51234:51234
+    env_file: .env
+    environment:
+      WAIT_HOSTS: mongodb-primary:27017, mongodb-secondary:27017, mongodb-arbiter:27017
+      WAIT_AFTER: 30
+
+  be-tests:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: ./tests/Dockerfile
+    depends_on:
+      - mongodb-primary
+      - mongodb-secondary
+      - mongodb-arbiter
+      - redis
+    links:
+      - mongodb-primary
+      - mongodb-secondary
+      - mongodb-arbiter
+      - redis
+    volumes:
+      - ./:/opt/app
+    env_file: .env
+    environment:
+      WAIT_HOSTS: mongodb-primary:27017, mongodb-secondary:27017, mongodb-arbiter:27017
+      WAIT_AFTER: 60
+
+volumes:
+  app-db-data:
+  redis-data:

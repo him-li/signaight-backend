@@ -1,0 +1,7 @@
+jtype: LinkedinAPI
+py_modules:
+  - executor/__init__.py
+metas:
+  name: Linkedin API Sesarch
+  description: Search users and their metadata at Linkedin
+  keywords: ["executor", "search", "Linkedin"]

@@ -1,0 +1,28 @@
+DEBUG=False
+ENVIRONMENT=testing
+DOMAIN=localhost
+JINA_HIDE_SURVEY=1
+JINA_LOG_LEVEL=DEBUG
+JINA_OPTOUT_TELEMETRY=1
+SERVER_HOST=http://localhost
+# SECRET_KEY should be in Fernet key format
+# https://8gwifi.org/fernet.jsp - online page for random fernet key
+ENCRYPTION_KEY=ho-HkfAhgTqpIsuKFGKd9jOf2U8tnOm841VfZVrUDSw
+SECRET=CHANGE_ME
+# Next variabels should changed according to test environment on demand
+MONGODB_URI=CHANGE_ME
+#MONGODB_URI="mongodb://root:qwerty1234@mongodb-primary/signaight?directConnection=true&authSource=admin"
+SMTP_URI=smtp://mailer@signaight.ai:123@localhost:587?usetls=True
+
+VETRIC_FACEBOOK_API_KEY=CHANGE_ME
+VETRIC_INSTAGRAM_API_KEY=CHANGE_ME
+# add here another api keys but maybe we mock responses later or so
+
+AWS_ACCESS_KEY_ID=CHANGE_ME
+AWS_SECRET_ACCESS_KEY=CHANGE_ME
+AWS_S3_REGION_NAME=eu-central-1
+AWS_S3_BUCKET=signaight-test
+
+FIEF_DOMAIN=http://localhost
+FIEF_CLIENT_ID=CLIENT_ID
+FIEF_CLIENT_SECRET=CLIENT_SECRET

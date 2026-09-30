@@ -1,0 +1,7 @@
+jtype: Aggregation
+py_modules:
+  - executor/__init__.py
+metas:
+  name: Aggregate entrypoint
+  description: Aggregate users entrypoint
+  keywords: ["executor", "aggregate", "entrypoint"]

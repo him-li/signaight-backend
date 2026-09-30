@@ -1,0 +1,15 @@
+# core deps include
+-r ../core/requirements.txt
+-r ./Aggregation/requirements.txt
+-r ./FacebookAPI/requirements.txt
+-r ./InstagramAPI/requirements.txt
+-r ./LinkedinAPI/requirements.txt
+-r ./PrimaryCandidateByFaceCompare/requirements.txt
+-r ./ProfilerAPI/requirements.txt
+-r ./ResultAPIReducer/requirements.txt
+-r ./SearchIn/requirements.txt
+-r ./SearchOut/requirements.txt
+-r ./TwitterAPI/requirements.txt
+-r ./WebScraper/requirements.txt
+
+parsel>=1.8.1

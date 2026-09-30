@@ -1,0 +1,7 @@
+jtype: ResultAPIMerger
+py_modules:
+  - executor.py
+metas:
+  name: ResultAPIMerger
+  description: Merge API results for one docs list
+  keywords: ["executor", "search", "merger"]

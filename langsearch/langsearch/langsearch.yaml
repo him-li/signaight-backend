@@ -1,0 +1,169 @@
+---
+atype: Agent
+metadata:
+  name: LangSearch
+  alias: langsearch
+  description: search data by basic inputs from open source
+config:
+  # global graph maximum iterations now default 3
+  max_iterations: 3
+  iterations:
+    # 1st iteration default is required only for one list items and also will
+    # applied if max iterations higher than iterations length value
+    - default: true
+      # Determine do graph need to use previous results
+      use_results: false
+      # Possible values: confirmed_match, likely_match, unclear, not_match
+      match_options: ["confirmed_match"]
+      # default - reuse_match_options: []
+    # iteration config could contain variables optionally
+    # to overlap default config
+    - use_results: true
+      reuse_match_options: ["likely_match"]
+    - use_results: true
+      reuse_match_options: ["likely_match"]
+  # timeout in seconds
+  timeout: 1800
+  flows:
+    default:
+      config:
+        # override for global timeout
+        timeout: 2400
+        max_search_queries: 4
+        google_search_items_per_page: 100
+      process_google_candidates_search_operator:
+        scoring_strategy: weighted
+        decision_tiers:
+          - name: reject
+            min_score: 0
+            max_score: 99
+          - name: allow
+            min_score: 100
+            max_score: 101
+        rules:
+          - enabled: true
+            score: 100
+            conditions:
+              all: # AND
+                #- field: "stats.process_linkedin_candidates_search_operator.iterations"
+                #  operator: "less_than"
+                #  value: 5
+                - field: "input.firstname"
+                  operator: "is_not_null"
+                  value: true
+                - field: "input.lastname"
+                  operator: "is_not_null"
+                  value: true
+                - field: "input.email"
+                  operator: "is_not_null"
+                  value: true
+      process_linkedin_candidates_search_operator:
+        scoring_strategy: weighted
+        decision_tiers:
+          - name: reject
+            min_score: 0
+            max_score: 99
+          - name: allow
+            min_score: 100
+            max_score: 101
+        rules:
+          - enabled: true
+            score: 100
+            conditions:
+              all: # AND
+                #- field: "stats.process_linkedin_candidates_search_operator.iterations"
+                #  operator: "less_than"
+                #  value: 3
+                - field: "input.firstname"
+                  operator: "is_not_null"
+                  value: true
+                - field: "input.lastname"
+                  operator: "is_not_null"
+                  value: true
+                - field: "input.email"
+                  operator: "is_not_null"
+                  value: true
+      process_facebook_candidates_search_operator:
+        scoring_strategy: weighted
+        decision_tiers:
+          - name: reject
+            min_score: 0
+            max_score: 99
+          - name: allow
+            min_score: 100
+            max_score: 101
+        rules:
+          - enabled: true
+            score: 100
+            conditions:
+              all: # AND
+                #- field: "stats.process_facebook_candidates_search_operator.iterations"
+                #  operator: "less_than"
+                #  value: 3
+                - field: "input.firstname"
+                  operator: "is_not_null"
+                  value: true
+                - field: "input.lastname"
+                  operator: "is_not_null"
+                  value: true
+                - field: "input.photo"
+                  operator: "is_not_null"
+                  value: true
+      process_instagram_candidates_search_operator:
+        scoring_strategy: weighted
+        decision_tiers:
+          - name: reject
+            min_score: 0
+            max_score: 99
+          - name: allow
+            min_score: 100
+            max_score: 101
+        rules:
+          - enabled: true
+            score: 100
+            conditions:
+              all: # AND
+                #- field: "stats.process_instagram_candidates_search_operator.iterations"
+                #  operator: "less_than"
+                #  value: 3
+                - field: "input.firstname"
+                  operator: "is_not_null"
+                  value: true
+                - field: "input.lastname"
+                  operator: "is_not_null"
+                  value: true
+                - field: "input.photo"
+                  operator: "is_not_null"
+                  value: true
+    google_only_flow:
+      config:
+        # override for global timeout
+        timeout: 2400
+        max_search_queries: 4
+        google_search_items_per_page: 100
+      process_google_candidates_search_operator:
+        scoring_strategy: weighted
+        decision_tiers:
+          - name: reject
+            min_score: 0
+            max_score: 99
+          - name: allow
+            min_score: 100
+            max_score: 101
+        rules:
+          - enabled: true
+            score: 100
+            conditions:
+              all: # AND
+                #- field: "stats.process_google_candidates_search_operator.iterations"
+                #  operator: "less_than"
+                #  value: 5
+                - field: "input.firstname"
+                  operator: "is_not_null"
+                  value: true
+                - field: "input.lastname"
+                  operator: "is_not_null"
+                  value: true
+                - field: "input.email"
+                  operator: "is_not_null"
+                  value: true

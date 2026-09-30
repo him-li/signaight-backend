@@ -1,0 +1,2 @@
+class DocumentCouldNotBeSaved(Exception):
+    pass

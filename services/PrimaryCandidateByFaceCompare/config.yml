@@ -1,0 +1,7 @@
+jtype: PrimaryCandidateByFaceCompare
+py_modules:
+  - executor/__init__.py
+metas:
+  name: Primary Candidates by face compare
+  description: Primary Candidates by face compare
+  keywords: ['executor', 'face', 'compare']

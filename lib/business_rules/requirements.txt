@@ -1,0 +1,8 @@
+#python>=3.7,<4.0
+asyncer>=0.0.7
+pytz>=2023.3
+mock
+nose
+nose-run-line-number
+pytest
+tox>=4.5.1

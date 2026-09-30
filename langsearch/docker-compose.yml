@@ -1,0 +1,121 @@
+services:
+  redis:
+    restart: unless-stopped
+    image: redis:8.0-alpine
+    command: redis-server --save 60 1 --loglevel warning
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+  rabbitmq:
+    restart: unless-stopped
+    image: rabbitmq:4.1-management
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: signaight
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+
+  mongodb-primary:
+    # image: 'docker.io/zcube/bitnami-compat-mongodb:6.0-debian-11'
+    image: docker.io/dlavrenuek/bitnami-mongodb-arm:8.0.9
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=mongodb-primary
+      - MONGODB_REPLICA_SET_MODE=primary
+      - MONGODB_ROOT_PASSWORD=${MONGODB_ROOT_PASSWORD}
+      - MONGODB_REPLICA_SET_KEY=${MONGODB_REPLICA_SET_KEY}
+      - "MONGODB_EXTRA_FLAGS= --quiet  --logpath /dev/null --maxConns=100000"
+      - MONGODB_DISABLE_SYSTEM_LOG=false
+      - MONGODB_SYSTEM_LOG_VERBOSITY=0
+      # https://github.com/bitnami/containers/issues/40947
+      - EXPERIMENTAL_DOCKER_DESKTOP_FORCE_QEMU=1
+    volumes:
+      - "app-db-data:/bitnami/mongodb"
+    ports:
+      - "27017:27017"
+
+  mongodb-secondary:
+    restart: always
+    image: docker.io/dlavrenuek/bitnami-mongodb-arm:8.0.9
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=mongodb-secondary
+      - MONGODB_REPLICA_SET_MODE=secondary
+      - MONGODB_INITIAL_PRIMARY_HOST=mongodb-primary
+      - MONGODB_INITIAL_PRIMARY_PORT_NUMBER=27017
+      - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=${MONGODB_ROOT_PASSWORD}
+      - MONGODB_REPLICA_SET_KEY=${MONGODB_REPLICA_SET_KEY}
+      - "MONGODB_EXTRA_FLAGS= --quiet  --logpath /dev/null --maxConns=100000"
+      - MONGODB_DISABLE_SYSTEM_LOG=false
+      - MONGODB_SYSTEM_LOG_VERBOSITY=0
+      - EXPERIMENTAL_DOCKER_DESKTOP_FORCE_QEMU=1
+
+  mongodb-arbiter:
+    restart: always
+    image: docker.io/dlavrenuek/bitnami-mongodb-arm:8.0.9
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=mongodb-arbiter
+      - MONGODB_REPLICA_SET_MODE=arbiter
+      - MONGODB_INITIAL_PRIMARY_HOST=mongodb-primary
+      - MONGODB_INITIAL_PRIMARY_PORT_NUMBER=27017
+      - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=${MONGODB_ROOT_PASSWORD}
+      - MONGODB_REPLICA_SET_KEY=${MONGODB_REPLICA_SET_KEY}
+      - "MONGODB_EXTRA_FLAGS= --quiet  --logpath /dev/null --maxConns=100000"
+      - MONGODB_DISABLE_SYSTEM_LOG=false
+      - MONGODB_SYSTEM_LOG_VERBOSITY=0
+      - EXPERIMENTAL_DOCKER_DESKTOP_FORCE_QEMU=1
+
+  postgres:
+    restart: unless-stopped
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${MLFLOW_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${MLFLOW_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${MLFLOW_POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  minio:
+    image: quay.io/minio/minio:latest
+    environment:
+      MINIO_ROOT_USER: ${MLFLOW_MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MLFLOW_MINIO_ROOT_PASSWORD}
+    command: server /data
+    ports:
+      - "9000:9000"
+    volumes:
+      - minio-data:/data
+
+  mlflow:
+    restart: unless-stopped
+    image: ghcr.io/mlflow/mlflow:latest-full
+    environment:
+      - MLFLOW_SERVER_HOST=0.0.0.0
+      - MLFLOW_SERVER_PORT=5000
+      - BACKEND_STORE_URI=${MLFLOW_BACKEND_STORE_URI}
+      - ARTIFACT_ROOT=s3://mlflow-artifacts
+      - AWS_ACCESS_KEY_ID=${MLFLOW_MINIO_ROOT_USER}
+      - AWS_SECRET_ACCESS_KEY=${MLFLOW_MINIO_ROOT_PASSWORD}
+      - MLFLOW_S3_ENDPOINT_URL=http://minio:9000
+      - MLFLOW_TRACKING_USERNAME=${MLFLOW_TRACKING_USERNAME}
+      - MLFLOW_TRACKING_PASSWORD=${MLFLOW_TRACKING_PASSWORD}
+      - MLFLOW_FLASK_SERVER_SECRET_KEY=${MLFLOW_FLASK_SERVER_SECRET_KEY}
+    command: >
+      mlflow server
+      --backend-store-uri ${MLFLOW_BACKEND_STORE_URI}
+      --default-artifact-root s3://mlflow-artifacts
+      --host 0.0.0.0
+      --port 5000
+    ports:
+      - "5001:5000"
+    depends_on:
+      - postgres
+
+volumes:
+  redis-data:
+  app-db-data:
+  postgres-data:
+  minio-data:

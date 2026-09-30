@@ -1,0 +1,11 @@
+.DS_Store
+.env
+**/.env
+**/__pycache__/
+**/*.py[cod]
+**/.pytest_cache/
+**/.venv/
+
+# Raw provider exports can contain personal data and credentials.
+services/ProfilerAPI/executor/grayfox/data/
+core/models/sample_data/

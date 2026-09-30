@@ -1,0 +1,7 @@
+jtype: ProfilerAPI
+py_modules:
+  - executor/__init__.py
+metas:
+  name: Profiler API Search
+  description: Search users and their metadata with Profiler
+  keywords: ["executor", "search", "Profiler"]

@@ -1,0 +1,5 @@
+# Install business_rules lib locally
+-r ../lib/business_rules/requirements.txt
+-e ../lib/business_rules
+# local requirements
+-r requirements.txt

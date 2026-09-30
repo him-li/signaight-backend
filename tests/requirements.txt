@@ -1,0 +1,18 @@
+# Tests import API settings and models, so include the API dependency set.
+-r ../api/requirements.txt
+-r ../lib/business_rules/requirements.txt
+-e lib/business_rules
+
+# Tests section
+pytest>=7.4.0
+pytest-asyncio>=0.23.0
+pytest-order>=1.1.0
+flake8>=5.0.4
+flake8-html>=0.4.3
+flake8-testcode>=0.1.1
+flake8-codeclimate>=0.3.0
+flake8-async>=22.11.14
+polyfactory>=1.17.2
+respx>=0.20.1
+faker>=24.0.0
+phonenumbers>=9.0.2

@@ -1,0 +1,6 @@
+# core deps include
+-r ../core/requirements.txt
+
+# cli - add typer all deps manually until they bump versions in next release
+typer>=0.7.0
+pydantic-2-mermaid>=0.7.0

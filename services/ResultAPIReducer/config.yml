@@ -1,0 +1,7 @@
+jtype: ResultAPIReducer
+py_modules:
+  - executor/__init__.py
+metas:
+  name: ResultAPIReducer
+  description: Reduce API results for one choice
+  keywords: ['executor', 'search', 'reducer']

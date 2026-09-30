@@ -1,0 +1,7 @@
+jtype: TwitterAPI
+py_modules:
+  - executor/__init__.py
+metas:
+  name: Twitter API Sesarch
+  description: Search users and their metadata at Twitter
+  keywords: ["executor", "search", "Twitter"]

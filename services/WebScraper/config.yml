@@ -1,0 +1,7 @@
+jtype: WebScraper
+py_modules:
+  - executor/__init__.py
+metas:
+  name: Web scrapping service
+  description: Search data for profiles by url
+  keywords: ["executor", "search", "scraping"]
