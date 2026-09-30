@@ -32,8 +32,10 @@ async def search_google_by_query_set(
     based on generate_person_search_query function
 
     """
-    logger.info(f"Process {len(query_set)} queries with limit "
-        f"{kwargs.get("limit", 50)}  items per query")
+    logger.info(
+        f"Process {len(query_set)} queries with limit "
+        f"{kwargs.get('limit', 50)} items per query"
+    )
     google_search_results = GoogleSearchResults()
     await get_results_array_from_google_async(
         list(query_set),
@@ -44,8 +46,10 @@ async def search_google_by_query_set(
         url_dict[extract_google_query(
             google_search_result.search_query)] = google_search_result.get_result_data_urls().copy()
 
-    logger.info("Under data extraction we will ommit "
-        f"{len(kwargs.get("urls_exclude", []))} already processed urls")
+    logger.info(
+        "Under data extraction we will ommit "
+        f"{len(kwargs.get('urls_exclude', []))} already processed urls"
+    )
     # build flat list of urls with check of previous processing
     flat_array_of_urls_to_scrape = [item
         for sublist in [item for item in url_dict.values()]

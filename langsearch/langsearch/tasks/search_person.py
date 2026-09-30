@@ -63,9 +63,10 @@ async def search_person_task(
             logger.error("No person found")
             return
 
-        logger.info(f"Gaph iteration {i+1} for search "
-            f"{person.input.model_dump_json(exclude_unset=True,
-                exclude_none=True)}")
+        logger.info(
+            f"Gaph iteration {i+1} for search "
+            f"{person.input.model_dump_json(exclude_unset=True, exclude_none=True)}"
+        )
 
         # UnifiedPersonModel contain same model attributes but less so we need to
         # shrinkdown them with SearchInput schema at the moment
