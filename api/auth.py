@@ -15,7 +15,7 @@ from api.config import settings
 from core.models import AuthUserModel
 
 
-class FiefAccessTokenInfo(TypedDict, total=False):
+class AccessTokenInfo(TypedDict, total=False):
     id: str
     sub: str
     email: str
@@ -24,7 +24,7 @@ class FiefAccessTokenInfo(TypedDict, total=False):
     exp: int
 
 
-class FiefUserInfo(TypedDict, total=False):
+class UserInfo(TypedDict, total=False):
     sub: str
     id: str
     email: str
@@ -65,7 +65,7 @@ def verify_password(password: str, encoded: str) -> bool:
         return False
 
 
-def user_info(user: AuthUserModel) -> FiefUserInfo:
+def user_info(user: AuthUserModel) -> UserInfo:
     return {
         "sub": str(user.id),
         "id": str(user.id),
@@ -93,7 +93,7 @@ def create_access_token(user: AuthUserModel) -> str:
     )
 
 
-def decode_access_token(token: str) -> FiefAccessTokenInfo:
+def decode_access_token(token: str) -> AccessTokenInfo:
     try:
         payload: dict[str, Any] = jwt.decode(
             token,
@@ -118,20 +118,20 @@ def decode_access_token(token: str) -> FiefAccessTokenInfo:
 
 async def authenticated_dependency(
     token: str = Depends(scheme),
-) -> FiefAccessTokenInfo:
+) -> AccessTokenInfo:
     return decode_access_token(token)
 
 
 async def current_user_dependency(
-    token_info: FiefAccessTokenInfo = Depends(authenticated_dependency),
-) -> FiefUserInfo:
+    token_info: AccessTokenInfo = Depends(authenticated_dependency),
+) -> UserInfo:
     user = await AuthUserModel.get(UUID(token_info["id"]))
     if not user or not user.is_active:
         raise HTTPException(status_code=401, detail="User not found or inactive")
     return user_info(user)
 
 
-class LocalAuth:
+class AuthService:
     def authenticated(self):
         return authenticated_dependency
 
@@ -139,8 +139,8 @@ class LocalAuth:
         return current_user_dependency
 
 
-class LocalUserInfoClient:
-    async def userinfo(self, token: str) -> FiefUserInfo:
+class UserDirectory:
+    async def userinfo(self, token: str) -> UserInfo:
         token_info = decode_access_token(token)
         user = await AuthUserModel.get(UUID(token_info["id"]))
         if not user:
@@ -148,8 +148,8 @@ class LocalUserInfoClient:
         return user_info(user)
 
 
-auth = LocalAuth()
-fief = LocalUserInfoClient()  # Compatibility alias while callers are migrated.
+auth = AuthService()
+user_directory = UserDirectory()
 
 
 async def get_socket_user_id(access_token: str) -> str | None:
@@ -159,12 +159,12 @@ async def get_socket_user_id(access_token: str) -> str | None:
         return None
 
 
-def get_http_user_id(access_token_info: FiefAccessTokenInfo) -> str | None:
+def get_http_user_id(access_token_info: AccessTokenInfo) -> str | None:
     return access_token_info.get("id")
 
 
 __all__ = [
-    "FiefAccessTokenInfo", "FiefUserInfo", "auth", "fief",
+    "AccessTokenInfo", "UserInfo", "auth", "user_directory",
     "create_access_token", "hash_password", "verify_password", "user_info",
     "get_socket_user_id", "get_http_user_id",
 ]

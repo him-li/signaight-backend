@@ -12,7 +12,7 @@ from core.utils.base import transform_user_info
 import asyncio
 from datetime import datetime
 
-from api.auth import auth, fief, FiefUserInfo, FiefAccessTokenInfo
+from api.auth import auth, user_directory, UserInfo, AccessTokenInfo
 from api.v1.persons.dependencies import get_persons_crud, PersonsCRUD
 from core.logging import logger
 from core.models import Person, PersonModel
@@ -50,9 +50,9 @@ async def search_persons(
     request_body: Dict,
     background_tasks: BackgroundTasks,
     persons_crud: PersonsCRUD = Depends(get_persons_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ):
-    user_info = await fief.userinfo(access_token_info.get("access_token"))
+    user_info = await user_directory.userinfo(access_token_info.get("access_token"))
     user_id = user_info.get("sub")
 
     selected_persons = request_body.get("selected_persons")
@@ -103,8 +103,8 @@ async def enrich_persons(
     request_body: Dict,
     background_tasks: BackgroundTasks,
     persons_crud: PersonsCRUD = Depends(get_persons_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
-    user_info: FiefUserInfo = Depends(auth.current_user()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
+    user_info: UserInfo = Depends(auth.current_user()),
 ):
     if not settings.EXTERNAL_PROVIDERS_ENABLED:
         return {"message": "External providers are disabled; no enrichment was started"}

@@ -3,7 +3,7 @@ from fastapi import (APIRouter, Depends,
                      status as http_status)
 from fastapi_filter import FilterDepends
 
-from api.auth import FiefAccessTokenInfo, auth
+from api.auth import AccessTokenInfo, auth
 from api.pagination import Page, Params
 from .filters import AlertsFilter
 from .dependencies import AlertsCRUD, get_alerts_crud
@@ -21,7 +21,7 @@ async def get_alerts(
     params: Params = Depends(),
     filter: AlertsFilter = FilterDepends(AlertsFilter),
     alerts: AlertsCRUD = Depends(get_alerts_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ) -> Page[AlertsRead]:
     alerts = await alerts.read_list(params, filter)
     return alerts
@@ -37,7 +37,7 @@ async def get_alerts_by_person(
     params: Params = Depends(),
     filter: AlertsFilter = FilterDepends(AlertsFilter),
     alerts: AlertsCRUD = Depends(get_alerts_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ) -> Page[AlertsRead]:
     return await alerts.read_all(params, filter, id)
 
@@ -50,7 +50,7 @@ async def get_alerts_by_person(
 async def get_alert(
     id: uuid.UUID,
     alerts: AlertsCRUD = Depends(get_alerts_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ) -> AlertsRead:
     return await alerts.read(id)
 
@@ -63,7 +63,7 @@ async def get_alert(
 async def add_alert(
     alert: AlertsCreate,
     alerts: AlertsCRUD = Depends(get_alerts_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ) -> AlertsRead:
     return await alerts.create(alert.model_dump())
 
@@ -77,6 +77,6 @@ async def update_alert(
     alert_id: uuid.UUID,
     alert: AlertsUpdate,
     alerts: AlertsCRUD = Depends(get_alerts_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ) -> AlertsRead:
     return await alerts.update(alert_id, alert.model_dump())

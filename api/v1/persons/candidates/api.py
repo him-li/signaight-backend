@@ -14,7 +14,7 @@ from fastapi import (
 )
 from fastapi_filter import FilterDepends
 
-from api.auth import FiefAccessTokenInfo, auth, fief
+from api.auth import AccessTokenInfo, auth, user_directory
 from api.pagination import Page, Params
 from api.socketio import socket_manager
 from api.v1.events.search.dependencies import SearchCRUD, get_search_crud
@@ -62,7 +62,7 @@ async def get_candidates(
     params: Params = Depends(),
     filter: CandidateFilter = FilterDepends(CandidateFilter),
     candidates: CandidatesCRUD = Depends(get_candidates_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ) -> Page[CandidateListRead]:
     # filter.person__id = request.path_params.get("person_id")
     # NOTE: filter require id as string for now
@@ -94,7 +94,7 @@ async def get_candidate(
     person_id: uuid.UUID,
     candidate_id: uuid.UUID,
     candidates: CandidatesCRUD = Depends(get_candidates_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ) -> CandidateRead:
     return await candidates.read(person_id, candidate_id)
 
@@ -108,7 +108,7 @@ async def add_candidate(
     person_id: uuid.UUID,
     candidate: CandidateCreate,
     candidates: CandidatesCRUD = Depends(get_candidates_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ) -> CandidateRead:
     if not candidate.search_id:
         candidate.search_id = str(person_id)
@@ -226,7 +226,7 @@ async def update_candidate(
     candidate_id: uuid.UUID,
     candidate: CandidateUpdate,
     candidates: CandidatesCRUD = Depends(get_candidates_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ) -> CandidateRead:
     return await candidates.update(person_id, candidate_id, candidate.model_dump())
 
@@ -243,13 +243,13 @@ async def update_primary_candidate(
     request: Request,
     background_tasks: BackgroundTasks,
     candidates: CandidatesCRUD = Depends(get_candidates_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
     searches_crud: SearchCRUD = Depends(get_search_crud),
 ) -> CandidateRead:
     # person_id = request.path_params.get("person_id")
     search_id = request.query_params.get("search_id")
 
-    user_info = await fief.userinfo(access_token_info.get("access_token"))
+    user_info = await user_directory.userinfo(access_token_info.get("access_token"))
     user_id = user_info.get("sub")
 
     person = await PersonModel.get((uuid.UUID(person_id)
@@ -362,7 +362,7 @@ async def delete_candidate(
     person_id: uuid.UUID,
     candidate_id: uuid.UUID,
     candidates: CandidatesCRUD = Depends(get_candidates_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ):
     await candidates.delete(person_id, candidate_id)
 
@@ -377,7 +377,7 @@ async def make_enrich_aggregate(access_token_info,
                                 candidate_id):
     person = await PersonModel.get(person_id)
     try:
-        user_info = await fief.userinfo(access_token_info.get("access_token"))
+        user_info = await user_directory.userinfo(access_token_info.get("access_token"))
         user_id = user_info.get("sub")
         host = (settings.JINA_REMOTE_FLOW_LINKEDIN
                 if settings.JINA_REMOTE_FLOW_LINKEDIN else None)   

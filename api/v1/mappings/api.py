@@ -4,7 +4,7 @@ from fastapi import (
     Depends, status as http_status)
 from fastapi_filter import FilterDepends
 
-from api.auth import FiefAccessTokenInfo, auth
+from api.auth import AccessTokenInfo, auth
 from api.pagination import Page, Params
 
 from .filters import MappingFilter
@@ -23,7 +23,7 @@ async def get_mappings(
     params: Params = Depends(),
     filter: MappingFilter = FilterDepends(MappingFilter),
     mappings: MappingsCRUD = Depends(get_mappings_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ) -> Page[MappingRead]:
     return await mappings.read_list(params, filter)
 
@@ -33,7 +33,7 @@ async def get_mappings(
 async def get_mapping(
     id: uuid.UUID,
     mappings: MappingsCRUD = Depends(get_mappings_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ) -> MappingRead:
     return await mappings.read(id)
 
@@ -46,7 +46,7 @@ async def get_mapping(
 async def add_mapping(
     mapping: MappingCreate,
     mappings: MappingsCRUD = Depends(get_mappings_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ) -> MappingRead:
     return await mappings.create(mapping.model_dump())
 
@@ -60,7 +60,7 @@ async def update_mapping(
     id: uuid.UUID,
     mapping: MappingUpdate,
     mappings: MappingsCRUD = Depends(get_mappings_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ) -> MappingRead:
     return await mappings.update(id, mapping.model_dump())
 
@@ -73,6 +73,6 @@ async def update_mapping(
 async def delete_mapping(
     id: uuid.UUID,
     mappings: MappingsCRUD = Depends(get_mappings_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ):
     await mappings.delete(id)

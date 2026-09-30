@@ -2,7 +2,7 @@ import uuid
 from fastapi import APIRouter, Response, Depends, status as http_status
 from fastapi_filter import FilterDepends
 
-from api.auth import FiefAccessTokenInfo, auth
+from api.auth import AccessTokenInfo, auth
 from api.pagination import Page, Params
 
 from .filters import CandidateFilter
@@ -22,7 +22,7 @@ async def get_candidates(
     params: Params = Depends(),
     filter: CandidateFilter = FilterDepends(CandidateFilter),
     candidates: CandidatesCRUD = Depends(get_candidates_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ) -> Page[CandidateRead]:
     return await candidates.read_list(params, filter)
 
@@ -35,7 +35,7 @@ async def get_candidates(
 async def get_candidate(
     id: uuid.UUID,
     candidates: CandidatesCRUD = Depends(get_candidates_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ) -> CandidateRead:
     return await candidates.read(id)
 
@@ -48,7 +48,7 @@ async def get_candidate(
 async def add_candidate(
     candidate: CandidateCreate,
     candidates: CandidatesCRUD = Depends(get_candidates_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ) -> CandidateRead:
     return await candidates.create(candidate.model_dump())
 
@@ -62,7 +62,7 @@ async def update_candidate(
     id: uuid.UUID,
     candidate: CandidateUpdate,
     candidates: CandidatesCRUD = Depends(get_candidates_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ) -> CandidateRead:
     return await candidates.update(id, candidate.model_dump())
 
@@ -75,6 +75,6 @@ async def update_candidate(
 async def delete_candidate(
     id: uuid.UUID,
     candidates: CandidatesCRUD = Depends(get_candidates_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ):
     await candidates.delete(id)

@@ -1,7 +1,6 @@
 import pytest
 import httpx
 from fastapi import status as http_status
-from fief_client.client import FiefACR 
 
 @pytest.mark.anyio
 async def test_healthcheck(test_client) -> None:
@@ -51,7 +50,6 @@ class TestAuthenticated:
         assert json == {
             "id": user_id,
             "scope": ["openid"],
-            "acr": FiefACR.LEVEL_ZERO,
             "permissions": [],
             "access_token": access_token,
         }
@@ -86,7 +84,6 @@ class TestAuthenticated:
         assert response.json() == {
             "id": user_id,
             "scope": ["openid", "offline_access"],
-            "acr": FiefACR.LEVEL_ZERO,
             "permissions": [],
             "access_token": access_token,
         }
@@ -124,7 +121,6 @@ class TestAuthenticated:
         assert json == {
             "id": user_id,
             "scope": ["openid", "offline_access"],
-            "acr": FiefACR.LEVEL_ZERO,
             "permissions": [],
             "access_token": access_token,
         }

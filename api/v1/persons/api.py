@@ -24,7 +24,7 @@ from fastapi_filter import FilterDepends
 from flatten_json import flatten
 
 from api.v1.projects.dependencies import ProjectsCRUD, get_projects_crud
-from api.auth import FiefAccessTokenInfo, auth, fief, FiefUserInfo
+from api.auth import AccessTokenInfo, auth, user_directory, UserInfo
 from api.pagination import Page, Params
 from api.socketio import socket_manager
 from api.v1.events.search.dependencies import get_search_crud, SearchCRUD
@@ -217,7 +217,7 @@ async def get_persons_by_project_id(
 async def get_leaderboard_info_by_project_id(
     id: uuid.UUID | str,
     projects: ProjectsCRUD = Depends(get_projects_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ):
     '''
     Path is deprecated, should be removed soon. Requests should be directed to
@@ -234,7 +234,7 @@ async def get_leaderboard_info_by_project_id(
 async def get_leaderboard_widgets_by_project_id(
     id: uuid.UUID | str,
     projects: ProjectsCRUD = Depends(get_projects_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ):
     '''
     Path is deprecated, should be removed soon. Requests should be directed to
@@ -253,7 +253,7 @@ async def get_leaderboard_widgets_by_project_id(
 async def get_person_basic_data_by_project_id(
     id: uuid.UUID | str,
     projects: ProjectsCRUD = Depends(get_projects_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ):
     '''
     Path is deprecated, should be removed soon. Requests should be directed to
@@ -272,7 +272,7 @@ async def get_person_basic_data_by_project_id(
 async def get_person_ranking_data_by_project_id(
     id: uuid.UUID | str,
     projects: ProjectsCRUD = Depends(get_projects_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ):
     '''
     Path is deprecated, should be removed soon. Requests should be directed to
@@ -293,8 +293,8 @@ async def refresh_all_persons_search(
     persons: PersonsCRUD = Depends(get_persons_crud),
     candidates_crud: CandidatesCRUD = Depends(get_candidates_crud),
     searches_crud: SearchCRUD = Depends(get_search_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
-    user_info: FiefUserInfo = Depends(auth.current_user()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
+    user_info: UserInfo = Depends(auth.current_user()),
 ):
     '''
     Path is deprecated, should be removed soon. Requests should be directed to
@@ -611,7 +611,7 @@ async def get_person_red_flags(
     params: Params = Depends(),
     filter: FlagFilter = FilterDepends(FlagFilter),
     flags: FlagsCRUD = Depends(get_flags_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ) -> Page[FlagRead]:
     return await flags.read_all_flags_by_person(params, filter, id)
 

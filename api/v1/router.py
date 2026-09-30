@@ -44,5 +44,3 @@ for router_item in routers:
         include_api(router, prefix=f"/{prefix}", tags=tags)
     else:
         include_api(router, prefix=f"/{prefix}")
-
-# Legacy Fief token fixtures are intentionally no longer mounted.

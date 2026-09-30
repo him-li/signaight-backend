@@ -6,7 +6,6 @@ from fastapi_filter.base.filter import BaseFilterModel
 from pydantic import field_validator, ValidationInfo
 from typing import Any
 
-# from api.auth import auth, fief
 
 
 class Filter(BaseFilterModel, extra='allow'):

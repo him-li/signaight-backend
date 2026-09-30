@@ -10,7 +10,7 @@ from fastapi import (
 from fastapi_filter import FilterDepends
 from typing import Optional, List
 
-from api.auth import FiefAccessTokenInfo, auth, fief, FiefUserInfo
+from api.auth import AccessTokenInfo, auth, user_directory, UserInfo
 from api.pagination import Page, Params
 from api.socketio import socket_manager
 from api.v1.flows.api import search_persons
@@ -53,7 +53,7 @@ async def get_projects(
 async def get_project(
     id: uuid.UUID,
     projects: ProjectsCRUD = Depends(get_projects_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ) -> ProjectRead:
     return await projects.read(id)
 
@@ -65,11 +65,11 @@ async def get_project(
 async def get_leaderboard_info(
     id: uuid.UUID | str,
     projects: ProjectsCRUD = Depends(get_projects_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ):
     projects_id = [id]
     if id == "all-projects":
-        user_info = await fief.userinfo(access_token_info.get("access_token"))
+        user_info = await user_directory.userinfo(access_token_info.get("access_token"))
         user_id = user_info.get("sub")
         projects_id = await projects.read_list_ids(user_id)
     else:
@@ -84,11 +84,11 @@ async def get_leaderboard_info(
 async def get_leaderboard_widgets(
     id: uuid.UUID | str,
     projects: ProjectsCRUD = Depends(get_projects_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ):
     projects_id = [id]
     if id == "all-projects":
-        user_info = await fief.userinfo(access_token_info.get("access_token"))
+        user_info = await user_directory.userinfo(access_token_info.get("access_token"))
         user_id = user_info.get("sub")
         projects_id = await projects.read_list_ids(user_id)
     else:
@@ -102,11 +102,11 @@ async def get_leaderboard_widgets(
 async def get_riskmatrix_widgets(
     id: uuid.UUID | str,
     projects: ProjectsCRUD = Depends(get_projects_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ):
     projects_id = [id]
     if id == "all-projects":
-        user_info = await fief.userinfo(access_token_info.get("access_token"))
+        user_info = await user_directory.userinfo(access_token_info.get("access_token"))
         user_id = user_info.get("sub")
         projects_id = await projects.read_list_ids(user_id)
     else:
@@ -123,11 +123,11 @@ async def get_riskmatrix_widgets(
 async def get_person_basic_data(
     id: uuid.UUID | str,
     projects: ProjectsCRUD = Depends(get_projects_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ):
     projects_id = [id]
     if id == "all-projects":
-        user_info = await fief.userinfo(access_token_info.get("access_token"))
+        user_info = await user_directory.userinfo(access_token_info.get("access_token"))
         user_id = user_info.get("sub")
         projects_id = await projects.read_list_ids(user_id)
     else:
@@ -144,11 +144,11 @@ async def get_person_basic_data(
 async def get_person_ranking_data(
     id: uuid.UUID | str,
     projects: ProjectsCRUD = Depends(get_projects_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ):
     projects_id = [id]
     if id == "all-projects":
-        user_info = await fief.userinfo(access_token_info.get("access_token"))
+        user_info = await user_directory.userinfo(access_token_info.get("access_token"))
         user_id = user_info.get("sub")
         projects_id = await projects.read_list_ids(user_id)
     else:
@@ -166,8 +166,8 @@ async def refresh_all_persons_search(
     background_tasks: BackgroundTasks,
     projects: ProjectsCRUD = Depends(get_projects_crud),
     persons: PersonsCRUD = Depends(get_persons_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
-    user_info: FiefUserInfo = Depends(auth.current_user()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
+    user_info: UserInfo = Depends(auth.current_user()),
 ):
     await projects.read(id)
     user_info = transform_user_info(user_info)
@@ -194,9 +194,9 @@ async def refresh_all_persons_search(
 async def add_project(
     project: ProjectCreate,
     projects: ProjectsCRUD = Depends(get_projects_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ) -> ProjectRead:
-    user_info = await fief.userinfo(access_token_info.get("access_token"))
+    user_info = await user_directory.userinfo(access_token_info.get("access_token"))
     user_id = user_info.get("sub")
     user_email = user_info.get("email", None)
     project.user_email = user_email
@@ -219,9 +219,9 @@ async def update_project(
     project: ProjectUpdate,
     full_recalculation: Optional[bool] = False,
     projects: ProjectsCRUD = Depends(get_projects_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ) -> ProjectRead:
-    user_info = await fief.userinfo(access_token_info.get("access_token"))
+    user_info = await user_directory.userinfo(access_token_info.get("access_token"))
     user_id = user_info.get("sub")
     project.updated_at = pendulum.now()
     updated_project = await projects.update(id, project.model_dump())
@@ -242,9 +242,9 @@ async def update_project(
 async def delete_project(
     id: uuid.UUID,
     projects: ProjectsCRUD = Depends(get_projects_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ):
-    user_info = await fief.userinfo(access_token_info.get("access_token"))
+    user_info = await user_directory.userinfo(access_token_info.get("access_token"))
     user_id = user_info.get("sub")
     await projects.delete(id)
     message = MessageBuilder.project_message(id, "deleted")
@@ -259,6 +259,6 @@ async def delete_project(
 async def cleanup_project(
     id: uuid.UUID,
     projects: ProjectsCRUD = Depends(get_projects_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ):
     await projects.cleanup(id)

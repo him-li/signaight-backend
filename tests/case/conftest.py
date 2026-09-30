@@ -7,7 +7,6 @@ from httpx import AsyncClient, Response
 from typing import Iterator, Generator, Callable, List
 from jwcrypto import jwk, jwt
 from datetime import datetime, timezone
-from fief_client.client import FiefACR 
 
 from core.config import settings
 from api.app import app
@@ -34,12 +33,12 @@ def keys() -> jwk.JWKSet:
 
 @pytest.fixture(scope="session")
 def signature_key(keys: jwk.JWKSet) -> jwk.JWK:
-    return keys.get_key("fief-client-tests-sig")
+    return keys.get_key("local-auth-tests-sig")
 
 
 @pytest.fixture(scope="session")
 def encryption_key(keys: jwk.JWKSet) -> jwk.JWK:
-    return keys.get_key("fief-client-tests-enc")
+    return keys.get_key("local-auth-tests-enc")
 
 
 @pytest.fixture(scope="session")
@@ -92,11 +91,10 @@ def generate_access_token(generate_token: Callable[..., str]):
         *,
         scope: str = "",
         permissions: List[str] = [],
-        acr: FiefACR = FiefACR.LEVEL_ZERO,
         **kwargs
     ) -> str:
         return generate_token(
-            encrypt=encrypt, scope=scope, permissions=permissions, acr=acr, **kwargs
+            encrypt=encrypt, scope=scope, permissions=permissions, **kwargs
         )
     return _generate_access_token
 
@@ -127,7 +125,6 @@ async def mock_api_requests(
         assert_all_mocked=True,
         assert_all_called=False
     ) as respx_mock:
-        #respx_mock.route(host="cerbos").pass_through()
         openid_configuration_route = (respx_mock.
                                       get("/.well-known/openid-configuration")
                                       )

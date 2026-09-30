@@ -86,7 +86,7 @@ class TestPersonsEndpoints():
         person = await PersonModel.get(person_id)
         assert person is None
 
-    @pytest.mark.skip(reason="This test does not work with cerbos ACL")
+    @pytest.mark.skip(reason="Authorization coverage is handled by unit tests")
     async def test_read_list_searched_filtered_ordered(
         self,
         test_client,

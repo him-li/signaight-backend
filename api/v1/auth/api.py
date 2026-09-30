@@ -7,7 +7,7 @@ from pydantic import BaseModel, EmailStr, Field
 from pymongo.errors import DuplicateKeyError
 
 from api.auth import (
-    FiefUserInfo,
+    UserInfo,
     auth,
     create_access_token,
     hash_password,
@@ -30,7 +30,7 @@ class RegisterRequest(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
-    user: FiefUserInfo
+    user: UserInfo
 
 
 @router.post("/register", response_model=TokenResponse, status_code=201)
@@ -72,6 +72,6 @@ async def login(
     return TokenResponse(access_token=token, user=user_info(user))
 
 
-@router.get("/me", response_model=FiefUserInfo)
-async def me(user: FiefUserInfo = Depends(auth.current_user())) -> FiefUserInfo:
+@router.get("/me", response_model=UserInfo)
+async def me(user: UserInfo = Depends(auth.current_user())) -> UserInfo:
     return user

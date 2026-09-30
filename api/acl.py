@@ -2,14 +2,14 @@
 
 from fastapi import Depends
 
-from api.auth import FiefAccessTokenInfo, auth, fief
+from api.auth import AccessTokenInfo, auth, user_directory
 from api.local_authorization import Principal
 
 
 async def get_principal(
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ) -> Principal:
-    userinfo = await fief.userinfo(access_token_info["access_token"])
+    userinfo = await user_directory.userinfo(access_token_info["access_token"])
     return Principal(
         id=str(userinfo["sub"]),
         roles=frozenset(access_token_info.get("permissions", [])),

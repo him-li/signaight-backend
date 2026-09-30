@@ -3,7 +3,7 @@ import uuid
 from fastapi import APIRouter, Depends, status as http_status, BackgroundTasks
 from fastapi_filter import FilterDepends
 
-from api.auth import FiefAccessTokenInfo, auth, fief, FiefUserInfo
+from api.auth import AccessTokenInfo, auth, user_directory, UserInfo
 from api.pagination import Page, Params
 from api.socketio import socket_manager
 
@@ -30,9 +30,9 @@ async def get_active_searches(
     params: Params = Depends(),
     filter: ActiveSearchFilter = FilterDepends(ActiveSearchFilter),
     active_searches: ActiveSearchCRUD = Depends(get_active_search_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ):
-    user_info = await fief.userinfo(access_token_info.get("access_token"))
+    user_info = await user_directory.userinfo(access_token_info.get("access_token"))
     user_id = user_info.get("sub")
     return await active_searches.read_list(params, filter, user_id)
 
@@ -45,7 +45,7 @@ async def get_active_searches(
 async def get_active_search(
     id: uuid.UUID,
     active_searches: ActiveSearchCRUD = Depends(get_active_search_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ):
     return await active_searches.read(id)
 
@@ -59,8 +59,8 @@ async def add_active_search(
     active_search: ActiveSearchEventCreate,
     background_tasks: BackgroundTasks,
     active_searches: ActiveSearchCRUD = Depends(get_active_search_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
-    user_info: FiefUserInfo = Depends(auth.current_user()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
+    user_info: UserInfo = Depends(auth.current_user()),
 ) -> ActiveSearchEventRead:
     user_info = transform_user_info(user_info)
     user_id = user_info.get("id")
@@ -86,7 +86,7 @@ async def update_active_search(
     active_search_id: uuid.UUID,
     active_search: ActiveSearchEventUpdate,
     active_searches: ActiveSearchCRUD = Depends(get_active_search_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ) -> ActiveSearchEventRead:
     return await active_searches.update(active_search_id,
                                         active_search.model_dump())

@@ -3,7 +3,7 @@ from fastapi import (APIRouter, Depends,
                      status as http_status)
 from fastapi_filter import FilterDepends
 
-from api.auth import FiefAccessTokenInfo, auth
+from api.auth import AccessTokenInfo, auth
 from api.pagination import Page, Params
 from .filters import EvaluationFilter
 from .dependencies import EvaluationCRUD, get_evaluation_crud
@@ -21,7 +21,7 @@ async def get_evaluations(
     params: Params = Depends(),
     filter: EvaluationFilter = FilterDepends(EvaluationFilter),
     evaluations: EvaluationCRUD = Depends(get_evaluation_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ) -> Page[EvaluationRead]:
     evaluation = await evaluations.read_list(params, filter)
     return evaluation
@@ -37,7 +37,7 @@ async def get_evaluation_by_person(
     params: Params = Depends(),
     filter: EvaluationFilter = FilterDepends(EvaluationFilter),
     evaluations: EvaluationCRUD = Depends(get_evaluation_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ) -> Page[EvaluationRead]:
     return await evaluations.read_all(params, filter, id)
 
@@ -50,7 +50,7 @@ async def get_evaluation_by_person(
 async def get_evaluation(
     id: uuid.UUID,
     evaluations: EvaluationCRUD = Depends(get_evaluation_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ) -> EvaluationRead:
     return await evaluations.read(id)
 
@@ -63,7 +63,7 @@ async def get_evaluation(
 async def add_evaluation(
     evaluation: EvaluationCreate,
     evaluations: EvaluationCRUD = Depends(get_evaluation_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ) -> EvaluationRead:
     return await evaluations.create(evaluation.model_dump())
 
@@ -77,6 +77,6 @@ async def update_evaluation(
     evaluation_id: uuid.UUID,
     evaluation: EvaluationUpdate,
     evaluations: EvaluationCRUD = Depends(get_evaluation_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ) -> EvaluationRead:
     return await evaluations.update(evaluation_id, evaluation.model_dump())

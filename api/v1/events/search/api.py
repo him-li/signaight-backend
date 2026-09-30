@@ -2,7 +2,7 @@ import uuid
 from fastapi import APIRouter, Depends, status as http_status
 from fastapi_filter import FilterDepends
 
-from api.auth import FiefAccessTokenInfo, auth, fief
+from api.auth import AccessTokenInfo, auth, user_directory
 from api.pagination import Page, Params
 from api.socketio import socket_manager
 
@@ -24,9 +24,9 @@ async def get_searches(
     params: Params = Depends(),
     filter: SearchFilter = FilterDepends(SearchFilter),
     searches: SearchCRUD = Depends(get_search_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ):
-    user_info = await fief.userinfo(access_token_info.get("access_token"))
+    user_info = await user_directory.userinfo(access_token_info.get("access_token"))
     user_id = user_info.get("sub")
     return await searches.read_list(params, filter, user_id)
 
@@ -39,9 +39,9 @@ async def get_searches(
 async def get_search(
     id: uuid.UUID,
     searches: SearchCRUD = Depends(get_search_crud),
-    access_token_info: FiefAccessTokenInfo = Depends(auth.authenticated()),
+    access_token_info: AccessTokenInfo = Depends(auth.authenticated()),
 ):
-    user_info = await fief.userinfo(access_token_info.get("access_token"))
+    user_info = await user_directory.userinfo(access_token_info.get("access_token"))
     user_id = user_info.get("sub")
     await searches.update(id, {"status": "Seen"})
     message = MessageBuilder.search_message(id, "seen")
